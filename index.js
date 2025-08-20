@@ -1,3 +1,4 @@
+const user = require("./model/User")
 const express = require("express")
 require("dotenv").config()
 const mongoose = require("mongoose")
@@ -17,3 +18,20 @@ mongoose.connect(mongoDBURL).then(()=>{
     console.error("Error connecting to MongoDB:", err)
 })
 app.use("/api/user",userRouter)
+const addAdmin = async () =>{
+    const existadmin = await user.findOne({role:"Admin"})
+    if(existadmin){
+        console.log("Admin already exists")
+        return
+    }
+    const admin = new user({
+        FullName:"rusira Dinujaya",
+        email:"rusira42103@gmail.com",
+        password:"rusira12345",
+        role:"Admin"
+    })
+    await admin.save().then((res)=>{
+        console.log("Admin created successfully")
+    })
+}
+addAdmin()
