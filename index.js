@@ -1,4 +1,5 @@
 const user = require("./model/User")
+const bcrypt = require("bcrypt")
 const express = require("express")
 require("dotenv").config()
 const mongoose = require("mongoose")
@@ -27,7 +28,7 @@ const addAdmin = async () =>{
     const admin = new user({
         FullName:"rusira Dinujaya",
         email:"rusira42103@gmail.com",
-        password:"rusira12345",
+        password:await bcrypt.hash("rusira134567", 10),
         role:"Admin"
     })
     await admin.save().then((res)=>{
