@@ -8,7 +8,7 @@ const app = express()
 
 app.use(cors())
 app.use(express.json())
-
+const CourseRouter = require("./router/CourseRouter")
 const userRouter = require("./router/UserRouter")
 const PORT = process.env.PORT || 8000
 app.listen(PORT,()=>{
@@ -23,7 +23,7 @@ mongoose.connect(mongoDBURL).then(()=>{
 })
 
 app.use("/api/user",userRouter)
-
+app.use("/api/course",CourseRouter)
 
 //function logics
 const addAdmin = async () =>{
