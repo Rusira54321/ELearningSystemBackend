@@ -16,19 +16,20 @@ const createCourse = async(req,res,next) =>{
         jwt.verify(token,secretkey,(err,payload)=>{
             if(err)
             {
-                return res.status(403).json({message:"Forbidden: Invalid token"})
+                return res.status(401).json({message:"Forbidden: Invalid token"})
             }
             const id = payload.id
             const finduser = async() =>{
                   const matcheduser =   await user.findById(id)
                   if(matcheduser.role=="Student" || matcheduser.role=="Admin")
                   {
-                        return res.status(400).json({message:"You are not teacher"})
+                        return res.status(403).json({message:"You are not teacher"})
                   }
             }
             finduser()
             next()
         })
 }
+
 
 module.exports = {createCourse}

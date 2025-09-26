@@ -10,6 +10,9 @@ app.use(cors())
 app.use(express.json())
 const CourseRouter = require("./router/CourseRouter")
 const userRouter = require("./router/UserRouter")
+const teacherRouter = require("./router/TeacherRouter")
+const adminRouter = require("./router/AdminRouter")
+const StudentRouter = require("./router/StudentRouter")
 const PORT = process.env.PORT || 8000
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`)   
@@ -24,7 +27,9 @@ mongoose.connect(mongoDBURL).then(()=>{
 
 app.use("/api/user",userRouter)
 app.use("/api/course",CourseRouter)
-
+app.use("/api/teacher",teacherRouter)
+app.use("/api/admin",adminRouter)
+app.use("/api/student",StudentRouter)
 //function logics
 const addAdmin = async () =>{
     const existadmin = await user.findOne({role:"Admin"})
