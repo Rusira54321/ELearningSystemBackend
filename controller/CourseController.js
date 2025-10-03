@@ -1,5 +1,6 @@
 const Course = require("../model/Course");
 const user = require("../model/User")
+
 const createCourses = async(req,res) =>{
     try{
     const image = req.file.filename
@@ -28,6 +29,29 @@ const createCourses = async(req,res) =>{
 }
 }
 
+const viewCourses = async(req,res) =>{
+    try{
+        const courses = await Course.find()
+        res.json(courses);
+    }catch(err){
+        return res.status(404).json({message:"Course not found"})
+    }
+}
+
+const deleteCourse = async(req,res)=>{
+    try{
+        const {id} = req.params;
+        const delCourse = await Course.findByIdAndDelete(id)
+        
+        if(!delCourse){
+            res.status(404).json({message:"Course not found"});
+        }
+        res.status(201).json({message:"Course deleted succesfully"});
+    }catch(err){
+        res.status(500).json({message:"Internal server error"});
+    }
+}
+
 const addLesson = async(req,res) =>{
     try{
     const {courseId} = req.params
@@ -36,11 +60,13 @@ const addLesson = async(req,res) =>{
     {
         return res.status(400).json({message:"title is required"})
     }
+
     const course = await Course.findById(courseId)
     if(!course)
     {
         return res.status(404).json({message:"Course not found"})
     }
+    
     const newLesson = {
         title,
         description,
@@ -101,4 +127,4 @@ const uploadMaterials = async(req,res) =>{
 }
 
 
-module.exports = {createCourses,addLesson,uploadMaterials}
+module.exports = {createCourses,viewCourses,deleteCourse,addLesson,uploadMaterials}
