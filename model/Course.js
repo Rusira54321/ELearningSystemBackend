@@ -1,5 +1,6 @@
 const e = require("express");
 const mongoose = require("mongoose")
+
 const lessonSchema = new mongoose.Schema({
     title:{
         type:String,
@@ -56,7 +57,9 @@ const courseSchema = new mongoose.Schema({
         ref:"User",
         required:true
     },
+
     lessons:[lessonSchema],
+    
     payorFree:{
         type:String,
         enum:["Paid","Free"],
