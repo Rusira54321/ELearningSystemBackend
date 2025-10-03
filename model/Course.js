@@ -66,6 +66,14 @@ const courseSchema = new mongoose.Schema({
         type:String,
         required:true
     },
+    Category:{
+        type:String,
+        enum:["Technology & IT","Business & Management","Personal Development","Creative Arts & Design","Science & Engineering","Language & Communication","Health & Fitness","Life Skills & Lifestyle","Exams & Certification Prep","Others / Emerging Topics"],
+        required:true
+    },
+    price:{
+        type:Number,
+    }
 }
 ,
 {

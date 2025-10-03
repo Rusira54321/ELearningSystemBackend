@@ -5,6 +5,7 @@ require("dotenv").config()
 const mongoose = require("mongoose")
 const cors = require("cors")
 const app = express()
+const path = require("path")
 
 app.use(cors())
 app.use(express.json())
@@ -25,6 +26,7 @@ mongoose.connect(mongoDBURL).then(()=>{
     console.error("Error connecting to MongoDB:", err)
 })
 
+app.use("/getImages",express.static(path.join(__dirname,'public')))
 app.use("/api/user",userRouter)
 app.use("/api/course",CourseRouter)
 app.use("/api/teacher",teacherRouter)

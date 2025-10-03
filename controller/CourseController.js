@@ -3,12 +3,12 @@ const user = require("../model/User")
 const createCourses = async(req,res) =>{
     try{
     const image = req.file.filename
-    const {title,description,teacher,payorFree} = req.body
+    const {title,description,teacher,payorFree,category,price} = req.body
     if(!image)
     {
         return res.status(500).json({message:"internal server error"})
     }
-    if(!title || !description || !teacher || !payorFree)
+    if(!title || !description || !teacher || !payorFree || !category)
     {
         return res.status(400).json({message:"All fields are missing"});
     }
@@ -18,7 +18,9 @@ const createCourses = async(req,res) =>{
         teacher,
         payorFree,
         lessons:[],
-        lessonPicture:image
+        lessonPicture:image,
+        Category:category,
+        price
     })
     await course.save()
     return res.status(201).json({message:"Course created successfully"})
@@ -100,5 +102,28 @@ const uploadMaterials = async(req,res) =>{
 }
 }
 
+const getAllCourses = async (req, res) => {
+  try {
+    const allCourses = await Course.find();
 
-module.exports = {createCourses,addLesson,uploadMaterials}
+    // Use Promise.all to wait for all async operations
+    const courses = await Promise.all(
+      allCourses.map(async (course) => {
+        const teacherDetails = await user.findById(course.teacher);
+        const teacherName = teacherDetails?.FullName || "Unknown";
+
+        return {
+          ...course.toObject(), // convert Mongoose document to plain object
+          teacherName,
+        };
+      })
+    );
+
+    return res.status(200).json({ courses });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = {createCourses,addLesson,uploadMaterials,getAllCourses}
