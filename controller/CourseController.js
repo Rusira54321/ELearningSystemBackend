@@ -129,4 +129,4 @@ const getAllCourses = async (req, res) => {
   }
 };
 
-module.exports = {createCourses,addLesson,uploadMaterials,getAllCourses}
+module.exports = {createCourses,uploadMaterials,getAllCourses,viewCourses,deleteCourse}
