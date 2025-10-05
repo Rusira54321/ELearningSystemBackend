@@ -1,5 +1,6 @@
 const Course = require("../model/Course");
 const user = require("../model/User")
+
 const createCourses = async(req,res) =>{
     try{
     const image = req.file.filename
@@ -30,38 +31,37 @@ const createCourses = async(req,res) =>{
 }
 }
 
-const addLesson = async(req,res) =>{
+const viewCourses = async(req,res) =>{
     try{
-    const {courseId} = req.params
-    const {title,description} = req.body
-    if(!title)
-    {
-        return res.status(400).json({message:"title is required"})
-    }
-    const course = await Course.findById(courseId)
-    if(!course)
-    {
+        const courses = await Course.find()
+        res.json(courses);
+    }catch(err){
         return res.status(404).json({message:"Course not found"})
     }
-    const newLesson = {
-        title,
-        description,
-        videos:[],
-        pdfs:[],
-        otherMaterials:[]
+}
+
+const deleteCourse = async(req,res)=>{
+    try{
+        const {id} = req.params;
+        const delCourse = await Course.findByIdAndDelete(id)
+        
+        if(!delCourse){
+            res.status(404).json({message:"Course not found"});
+        }
+        res.status(201).json({message:"Course deleted succesfully"});
+    }catch(err){
+        res.status(500).json({message:"Internal server error"});
     }
-    course.lessons.push(newLesson)
-    await course.save()
-    return res.status(200).json({message:"Lesson added successfully"})
-    }catch(err)
-    {
-        return res.status(500).json({message:"Internal server error",Error:err})
-    }
-}   
+}
 
 const uploadMaterials = async(req,res) =>{
     try{
-    const {courseId,lessonID} = req.params
+    const {courseId} = req.params
+    const {title,description} = req.body
+    if(!title || !description)
+    {
+        return res.status(400).json({message:"Fields are required"})
+    }
     if(!req.files || Object.keys(req.files).length==0)
     {
         return res.status(400).json({message:"No files uploaded"})
@@ -71,34 +71,37 @@ const uploadMaterials = async(req,res) =>{
     {
         return res.status(404).json({message:"Course not found"})
     }
-    const lesson = course.lessons.id(lessonID)
-    if(!lesson)
-    {
-        return res.status(404).json({message:"Lesson not found"})
+    const lessons = {
+        title,
+        description,
+        videos:[],
+        pdfs:[],
+        otherMaterials:[]
     }
     if(req.files.videos && Array.isArray(req.files.videos))
     {
-        req.files.videos.foreach((file)=>{
-            lesson.videos.push({title:file.originalname,videoUrl:file.filename})
+        req.files.videos.forEach((file)=>{
+            lessons.videos.push({title:file.originalname,videoUrl:file.filename})
         })
     }
     if(req.files.pdfs && Array.isArray(req.files.pdfs))
     {
-        req.files.pdfs.foreach((file)=>{
-            lesson.pdfs.push({title:file.originalname,videoUrl:file.filename})   
+        req.files.pdfs.forEach((file)=>{
+            lessons.pdfs.push({title:file.originalname,videoUrl:file.filename})   
         })
     }
     if(req.files.others && Array.isArray(req.files.others))
     {
-        req.files.others.foreach((file)=>{
-            lesson.otherMaterials.push({fileUrl:file.filename})
+        req.files.others.forEach((file)=>{
+            lessons.otherMaterials.push({fileUrl:file.filename})
         })
     }
+    course.lessons.push(lessons)
     await course.save()
     return res.status(200).json({message:"Files uploaded"})
 }catch(err)
 {
-    return res.status(500).json({message:err.message})
+    return res.status(500).json({message:err})
 }
 }
 
