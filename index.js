@@ -30,6 +30,7 @@ mongoose.connect(mongoDBURL).then(()=>{
 })
 app.use(express.json())
 app.use("/getImages",express.static(path.join(__dirname,'public')))
+app.use("/getLectureMeterials",express.static(path.join(__dirname,'uploads')))
 app.use("/api/user",userRouter)
 app.use("/api/course",CourseRouter)
 app.use("/api/teacher",teacherRouter)
