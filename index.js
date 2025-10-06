@@ -8,7 +8,8 @@ const app = express()
 const path = require("path")
 
 app.use(cors())
-app.use(express.json())
+const stripeRouter = require("./router/StripeRouter")
+app.use("/api",stripeRouter)
 const CourseRouter = require("./router/CourseRouter")
 const userRouter = require("./router/UserRouter")
 const teacherRouter = require("./router/TeacherRouter")
@@ -27,7 +28,7 @@ mongoose.connect(mongoDBURL).then(()=>{
 }).catch((err)=>{
     console.error("Error connecting to MongoDB:", err)
 })
-
+app.use(express.json())
 app.use("/getImages",express.static(path.join(__dirname,'public')))
 app.use("/api/user",userRouter)
 app.use("/api/course",CourseRouter)

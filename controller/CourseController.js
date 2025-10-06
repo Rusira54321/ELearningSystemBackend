@@ -129,4 +129,45 @@ const getAllCourses = async (req, res) => {
   }
 };
 
-module.exports = {createCourses,uploadMaterials,getAllCourses,viewCourses,deleteCourse}
+const getCourseById = async(req,res) =>{
+    try{
+        const {id} = req.params
+        if(!id)
+        {
+            return res.status(400).json({message:"request has an error"})
+        }
+        const course = await Course.findById(id).populate("teacher","FullName")
+        if(!course)
+        {
+            return res.status(404).json({message:"Course not found"})
+        }
+        return res.status(200).json({course})
+    }catch(err)
+    {
+        return res.status(500).json(err.message)
+    }
+} 
+const getEnrolledCourse = async (req, res) => {
+    const { userid } = req.params;
+
+    try {
+        const User = await user.findById(userid);
+        if (!User) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const enrolledCoursesIds = User.enrolledCourses.map(ec => ec.courseID);
+
+        // Fetch all courses in parallel
+        const courses = await Promise.all(
+            enrolledCoursesIds.map(id => Course.findById(id))
+        );
+
+        return res.status(200).json({ courses });
+    } catch (error) {
+        return res.status(500).json({ error });
+    }
+};
+
+
+module.exports = {createCourses,uploadMaterials,getAllCourses,viewCourses,deleteCourse,getCourseById,getEnrolledCourse}

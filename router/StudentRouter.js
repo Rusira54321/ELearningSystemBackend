@@ -1,7 +1,10 @@
-const router = require("express").Router()
-const {verifyStudentTokens} = require("../controller/StudentController")
+const express = require("express")
+const router = express.Router()
+const {verifyStudentTokens,enrollStudents,StripeIntegrationForEnrolment,stripeWebhook} = require("../controller/StudentController")
 const {authorizedStudent} = require("../Middleware/Student")
 const {getAllCourses} = require("../controller/CourseController")
 router.post("/verifyStudentToken",verifyStudentTokens)
 router.get("/getAllCourses",authorizedStudent,getAllCourses)
+router.post("/enrollStudents",authorizedStudent,enrollStudents)
+router.post("/stripeEnrolment",authorizedStudent,StripeIntegrationForEnrolment)
 module.exports = router

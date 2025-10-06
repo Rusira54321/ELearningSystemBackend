@@ -1,4 +1,11 @@
 const mongoose = require("mongoose")
+const courseSchema = new mongoose.Schema({
+    courseID:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Course",
+        required:true
+    }
+})
 const userSchema = new mongoose.Schema({
     FullName:{
         type:String,
@@ -40,6 +47,7 @@ const userSchema = new mongoose.Schema({
     createdAt:{
         type:Date,
         default:Date.now()
-    }
+    },
+    enrolledCourses:[courseSchema]
 })
 module.exports = mongoose.model("User", userSchema)

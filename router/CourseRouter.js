@@ -1,12 +1,14 @@
 const express = require("express")
 const router = express.Router()
-const {createCourses,viewCourses,uploadMaterials, deleteCourse} = require("../controller/CourseController")
+const {createCourses,viewCourses,uploadMaterials, deleteCourse,getCourseById,getEnrolledCourse} = require("../controller/CourseController")
+const {authorizedStudent} = require("../Middleware/Student")
 const {upload} = require("../Middleware/Multer")
 const {mutipleFileupload} = require("../Middleware/MulipleFileUploader")
 const {createCourse} = require("../Middleware/Course")
-
+router.get("/getCourseDetails/:id",authorizedStudent,getCourseById)
 router.post("/create",createCourse,upload.single("coursePicture"),createCourses)
 router.post("/materials/upload/:courseId",createCourse,mutipleFileupload.fields( [{ name: "videos", maxCount: 20 },{ name: "pdfs", maxCount: 20 },{ name: "others", maxCount: 20 }]),uploadMaterials)
 router.get("/all",viewCourses)
 router.delete("/delete/:id",deleteCourse)
+router.get("/getEnrolledCourses/:userid",authorizedStudent,getEnrolledCourse)
 module.exports = router

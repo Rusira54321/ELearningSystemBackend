@@ -1,4 +1,3 @@
-const e = require("express");
 const mongoose = require("mongoose")
 
 const lessonSchema = new mongoose.Schema({
@@ -41,7 +40,13 @@ const lessonSchema = new mongoose.Schema({
     ],
     
 });
-
+const StudentSchema = new mongoose.Schema({
+    StudentID:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"User",
+        required:true
+    }
+})
 const courseSchema = new mongoose.Schema({
     title:{
         type:String,
@@ -76,7 +81,8 @@ const courseSchema = new mongoose.Schema({
     },
     price:{
         type:Number,
-    }
+    },
+    enrollStudents:[StudentSchema]
 }
 ,
 {

@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken")
 const user = require("../model/User")
+const course = require("../model/Course")
 require("dotenv").config()
 const secretkey = process.env.JWT_SECRET
 const getTeacherIdByToken  = (req,res) =>{
@@ -41,4 +42,22 @@ const getTeacherIdByToken  = (req,res) =>{
 
 }
 
-module.exports = {getTeacherIdByToken}
+const getCourseEnrolledStudents = async(req,res) =>{
+    const {teacherId} = req.body
+    if(!teacherId)
+    {
+        return res.status(400).json({message:"Request has an error"})
+    }
+    try{
+    const courses = await course.find({teacher:teacherId}).populate('enrollStudents.StudentID', 'FullName email');
+    if(!courses || courses.length === 0)
+    {
+        return res.status(404).json({message:"no courses found for this teacher"})
+    }
+    return res.status(200).json({courses})
+}catch(err)
+{
+    return res.status(500).json({err})
+}
+}
+module.exports = {getTeacherIdByToken,getCourseEnrolledStudents}
