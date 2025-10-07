@@ -32,11 +32,16 @@ const createCourses = async(req,res) =>{
 }
 
 const viewCourses = async(req,res) =>{
+    const {teacherId} = req.params
     try{
-        const courses = await Course.find()
-        res.json(courses);
+        const courses = await Course.find({teacher:teacherId})
+        if(courses.length==0)
+        {
+            return res.status(404).json({message:"Coures are not found"})
+        }
+        return res.json(courses);
     }catch(err){
-        return res.status(404).json({message:"Course not found"})
+        return res.status(500).json({message:err.message})
     }
 }
 

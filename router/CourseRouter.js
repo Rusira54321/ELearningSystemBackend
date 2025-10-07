@@ -8,7 +8,7 @@ const {createCourse} = require("../Middleware/Course")
 router.get("/getCourseDetails/:id",authorizedStudent,getCourseById)
 router.post("/create",createCourse,upload.single("coursePicture"),createCourses)
 router.post("/materials/upload/:courseId",createCourse,mutipleFileupload.fields( [{ name: "videos", maxCount: 20 },{ name: "pdfs", maxCount: 20 },{ name: "others", maxCount: 20 }]),uploadMaterials)
-router.get("/all",viewCourses)
+router.get("/all/:teacherId",createCourse,viewCourses)
 router.delete("/delete/:id",deleteCourse)
 router.get("/getEnrolledCourses/:userid",authorizedStudent,getEnrolledCourse)
 module.exports = router
