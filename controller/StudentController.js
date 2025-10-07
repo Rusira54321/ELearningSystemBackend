@@ -5,6 +5,8 @@ require("dotenv").config()
 const Stripesecret = process.env.STRIPE_SECRET_KEY
 const stripe=require("stripe")(Stripesecret)
 const secretkey = process.env.JWT_SECRET
+const quiz = require("../model/QuizSchema")
+const quizSubmission = require("../model/QuizSubmissionSchema")
 const verifyStudentTokens = (req,res) =>{
     const authHeader = req.header("Authorization")
             if(!authHeader)
@@ -173,4 +175,52 @@ const stripeWebhook = async(req,res) =>{
 
         }
 }
-module.exports = {verifyStudentTokens,enrollStudents,StripeIntegrationForEnrolment,stripeWebhook}
+
+const getQuizesbyCourse = async(req,res) =>{
+    try{
+        const {courseId} = req.params
+        const quizzes = await quiz.find({courseId:courseId})
+        if(quizzes.length==0)
+        {
+            return res.status(404).json({message: "No quizzes found for this course"})
+        }
+        return res.status(200).json(quizzes)
+    }catch(err)
+    {
+        return res.status(500).json({error:err.message})
+    }
+}
+
+const submitQuiz = async(req,res) =>{
+    try{
+    const {quizId,studentId,answers} = req.body
+    if(!quizId || !studentId || !answers)
+    {
+        return res.status(400).json({message:"All fields are required"})
+    }
+    const MatchedQuiz= await quiz.findById(quizId)
+    if(MatchedQuiz==null)
+    {
+        return res.status(404).json({message:"Quiz is not found"})
+    }
+    let score = 0;
+    MatchedQuiz.questions.forEach((q,index)=>{
+        if(answers[index]===q.correctAnswer)
+            {
+                score++
+            }        
+    });
+    const submission = new quizSubmission({
+        quizId:quizId,
+        studentID:studentId,
+        answers:answers,
+        score:score
+    })
+    await submission.save()
+    return res.status(201).json({message:"Submit successful",score})
+    }catch(err)
+    {
+        return res.status(500).json({message:err.message})
+    }
+}
+module.exports = {verifyStudentTokens,enrollStudents,StripeIntegrationForEnrolment,stripeWebhook,getQuizesbyCourse,submitQuiz}

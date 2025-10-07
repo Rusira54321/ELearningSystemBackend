@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken")
 const user = require("../model/User")
 const course = require("../model/Course")
+const quiz = require("../model/QuizSchema")
 require("dotenv").config()
 const secretkey = process.env.JWT_SECRET
 const getTeacherIdByToken  = (req,res) =>{
@@ -60,4 +61,17 @@ const getCourseEnrolledStudents = async(req,res) =>{
     return res.status(500).json({err})
 }
 }
-module.exports = {getTeacherIdByToken,getCourseEnrolledStudents}
+
+const createQuize = async(req,res) =>{
+    try{
+        const Quiz = new quiz(req.body)
+        await Quiz.save()
+        return res.status(201).json({success:true})
+    }catch(error)
+    {
+        return res.status(500).json({success:false,error:error.message})
+    }
+}
+
+
+module.exports = {getTeacherIdByToken,getCourseEnrolledStudents,createQuize}
