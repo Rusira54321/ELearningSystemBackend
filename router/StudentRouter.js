@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router()
-const {verifyStudentTokens,enrollStudents,StripeIntegrationForEnrolment,getQuizesbyCourse,submitQuiz,getQuizById} = require("../controller/StudentController")
+const {verifyStudentTokens,enrollStudents,StripeIntegrationForEnrolment,getQuizesbyCourse,submitQuiz,getQuizById,getStudentAnnouncements} = require("../controller/StudentController")
 const {authorizedStudent} = require("../Middleware/Student")
 const {getAllCourses} = require("../controller/CourseController")
 router.post("/verifyStudentToken",verifyStudentTokens)
@@ -10,4 +10,5 @@ router.post("/stripeEnrolment",authorizedStudent,StripeIntegrationForEnrolment)
 router.get("/getQuizzes/:courseId",authorizedStudent,getQuizesbyCourse)
 router.post("/submitQuiz",authorizedStudent,submitQuiz)
 router.get("/getQuiz/:quizId",authorizedStudent,getQuizById)
+router.get("/getAnnouncements/:studentId",authorizedStudent,getStudentAnnouncements)
 module.exports = router

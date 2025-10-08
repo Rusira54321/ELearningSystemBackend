@@ -95,7 +95,7 @@ const addAnnouncements = async(req,res) =>{
     if(req.files.others && Array.isArray(req.files.others))
     {
         req.files.others.forEach((file)=>{
-            Announcement.OtherMaterials.push({Url:file.filename})
+            Announcement.OtherMaterials.push({title:file.originalname,Url:file.filename})
         })
     }
     const newAnnouncement = new announcement(Announcement)

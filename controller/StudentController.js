@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken")
 const user = require("../model/User")
 const Course = require("../model/Course")
 require("dotenv").config()
+const announcement = require("../model/Announcement")
 const Stripesecret = process.env.STRIPE_SECRET_KEY
 const stripe=require("stripe")(Stripesecret)
 const secretkey = process.env.JWT_SECRET
@@ -237,4 +238,43 @@ const getQuizById = async(req,res) =>{
         return res.status(500).json({error:err.message})
     }
 }
-module.exports = {verifyStudentTokens,enrollStudents,StripeIntegrationForEnrolment,stripeWebhook,getQuizesbyCourse,submitQuiz,getQuizById}
+const getStudentAnnouncements = async (req, res) => {
+  try {
+    const { studentId } = req.params
+
+    // 1. Find the student
+    const student = await user.findById(studentId)
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" })
+    }
+
+    // 2. Extract enrolled course IDs
+    const courseIds = student.enrolledCourses.map(c => c.courseID)
+
+    if (!courseIds || courseIds.length === 0) {
+      return res.status(200).json({ message: "No enrolled courses", announcements: [] })
+    }
+
+    // 3. Find all announcements for those courses
+    const announcements = await announcement.find({
+      CourseId: { $in: courseIds }
+    })
+      .populate("CourseId", "title")  // get course title
+      .populate("teacherId", "FullName email") // get teacher info
+      .sort({ createdAt: -1 }) // latest first
+
+    // 4. Send response
+    return res.status(200).json({
+      count: announcements.length,
+      announcements
+    })
+
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({ message: "Server error", error: err.message })
+  }
+}
+module.exports = {verifyStudentTokens,enrollStudents,StripeIntegrationForEnrolment,
+    stripeWebhook,getQuizesbyCourse,submitQuiz,getQuizById
+    ,getStudentAnnouncements
+}

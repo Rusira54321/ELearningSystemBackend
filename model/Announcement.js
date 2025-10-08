@@ -20,6 +20,9 @@ const AnnouncementSchema = new mongoose.Schema({
     },
     OtherMaterials:[
         {
+            title:{
+                type:String,
+            },
             Url:{
                 type:String,
             }
