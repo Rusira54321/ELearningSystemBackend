@@ -1,6 +1,7 @@
 const Course = require("../model/Course");
 const user = require("../model/User")
-
+const quiz = require("../model/QuizSchema")
+const quizSubmissionSchema  = require("../model/QuizSubmissionSchema")
 const createCourses = async(req,res) =>{
     try{
     const image = req.file.filename
@@ -45,19 +46,40 @@ const viewCourses = async(req,res) =>{
     }
 }
 
-const deleteCourse = async(req,res)=>{
-    try{
-        const {id} = req.params;
-        const delCourse = await Course.findByIdAndDelete(id)
-        
-        if(!delCourse){
-            res.status(404).json({message:"Course not found"});
-        }
-        res.status(201).json({message:"Course deleted succesfully"});
-    }catch(err){
-        res.status(500).json({message:"Internal server error"});
+const deleteCourse = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // 1. Delete the course
+    const delCourse = await Course.findByIdAndDelete(id);
+    if (!delCourse) {
+      return res.status(404).json({ message: "Course not found" });
     }
-}
+
+    // 2. Find all quizzes for this course
+    const quizzes = await quiz.find({ courseId: id });
+
+    if (quizzes.length > 0) {
+      const quizIds = quizzes.map(q => q._id);
+
+      // 3. Delete all quizzes in one go
+      await quiz.deleteMany({ _id: { $in: quizIds } });
+
+      // 4. Delete all quiz submissions for those quizzes
+      await quizSubmissionSchema.deleteMany({ quizId: { $in: quizIds } });
+    }
+
+    // 5. Remove courseId from all users' enrolledCourses
+    await user.updateMany(
+      { "enrolledCourses.courseID": id },
+      { $pull: { enrolledCourses: { courseID: id } } }
+    );
+
+    return res.status(200).json({ message: "Course and related data deleted successfully" });
+  } catch (err) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
 
 const uploadMaterials = async(req,res) =>{
     try{

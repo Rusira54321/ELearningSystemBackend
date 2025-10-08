@@ -223,4 +223,18 @@ const submitQuiz = async(req,res) =>{
         return res.status(500).json({message:err.message})
     }
 }
-module.exports = {verifyStudentTokens,enrollStudents,StripeIntegrationForEnrolment,stripeWebhook,getQuizesbyCourse,submitQuiz}
+const getQuizById = async(req,res) =>{
+    const {quizId} = req.params
+    try{
+    const Quiz = await quiz.findById(quizId)
+    if(Quiz==null)
+    {
+        return res.status(404).json({message:"Quiz is not found"})
+    }
+        return res.status(200).json({Quiz})
+    }catch(err)
+    {
+        return res.status(500).json({error:err.message})
+    }
+}
+module.exports = {verifyStudentTokens,enrollStudents,StripeIntegrationForEnrolment,stripeWebhook,getQuizesbyCourse,submitQuiz,getQuizById}
