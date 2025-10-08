@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken")
 const user = require("../model/User")
 const course = require("../model/Course")
 const quiz = require("../model/QuizSchema")
+const announcement = require("../model/Announcement")
 require("dotenv").config()
 const secretkey = process.env.JWT_SECRET
 const getTeacherIdByToken  = (req,res) =>{
@@ -73,5 +74,37 @@ const createQuize = async(req,res) =>{
     }
 }
 
-
-module.exports = {getTeacherIdByToken,getCourseEnrolledStudents,createQuize}
+const addAnnouncements = async(req,res) =>{
+    try{
+    const {title,description,CourseId,teacherId} = req.body
+    if(!title || !description || !CourseId)
+    {
+        return res.status(400).json({message:"Missing Fields"})
+    }
+    if(!req.files || Object.keys(req.files).length==0)
+    {
+        return res.status(400).json({message:"No files uploaded"})
+    }
+    const Announcement = {
+        CourseId:CourseId,
+        teacherId:teacherId,
+        title:title,
+        Description:description,
+        OtherMaterials:[]
+    }
+    if(req.files.others && Array.isArray(req.files.others))
+    {
+        req.files.others.forEach((file)=>{
+            Announcement.OtherMaterials.push({Url:file.filename})
+        })
+    }
+    const newAnnouncement = new announcement(Announcement)
+    await newAnnouncement.save()
+    return res.status(201).json({message:"Announcement is created"})
+    }
+    catch(err)
+    {
+        return res.status(500).json({message:err.message})
+    }
+}
+module.exports = {getTeacherIdByToken,getCourseEnrolledStudents,createQuize,addAnnouncements,addAnnouncements}
