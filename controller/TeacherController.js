@@ -63,6 +63,34 @@ const getCourseEnrolledStudents = async(req,res) =>{
 }
 }
 
+const getNumberOFTotalStudents = async(req,res) =>{
+    const {teacherId} = req.body
+    if(!teacherId)
+    {
+        return res.status(400).json({message:"Request has an error"})
+    }
+    try{
+    const courses = await course.find({teacher:teacherId}).populate('enrollStudents.StudentID', 'FullName email')
+    const students = []
+    let studentCount = 0
+    for(const course of courses)
+    {
+        for(const student of course.enrollStudents)
+        {
+                if(!students.includes(student.StudentID._id))
+                {
+                    studentCount++
+                    students.push(student.StudentID._id)
+                }
+        }
+    }
+    return res.status(200).json({studentCount})
+}catch(err)
+{
+    return res.status(500).json({error:err.message})
+}
+}
+
 const createQuize = async(req,res) =>{
     try{
         const Quiz = new quiz(req.body)
@@ -107,4 +135,4 @@ const addAnnouncements = async(req,res) =>{
         return res.status(500).json({message:err.message})
     }
 }
-module.exports = {getTeacherIdByToken,getCourseEnrolledStudents,createQuize,addAnnouncements,addAnnouncements}
+module.exports = {getTeacherIdByToken,getCourseEnrolledStudents,createQuize,addAnnouncements,addAnnouncements,getNumberOFTotalStudents}
