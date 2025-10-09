@@ -138,22 +138,24 @@ const addAnnouncements = async(req,res) =>{
 const countNumberOfCoursesByTeacherId = async(req,res) =>{
     const {teacherId} = req.params
     try{
-    const courses = await course.find({teacher:teacherId})
-    if(courses.length==0)
-    {
-        return res.status(404).json({message:"Courses not found"})
-    }
-    let count = 0
-    for(const COURSE of courses)
-    {
-        count++
-    }
+    const count = await course.countDocuments({teacher:teacherId})
     return res.status(200).json({count})
     }catch(err)
     {
         return res.status(500).json({error:err.message})
     }
 }
+const countNumberOfQuizesByTeacherId = async(req,res) =>{
+    try{
+    const {teacherId} = req.params
+    const count = await quiz.countDocuments({teacherId:teacherId})
+    return res.status(200).json({count})
+}catch(err)
+{
+    return res.status(500).json({error:err.message})
+}
+}
 module.exports = {getTeacherIdByToken,getCourseEnrolledStudents,createQuize,
     addAnnouncements,addAnnouncements,
-    getNumberOFTotalStudents,countNumberOfCoursesByTeacherId}
+    getNumberOFTotalStudents,
+    countNumberOfCoursesByTeacherId,countNumberOfQuizesByTeacherId}
