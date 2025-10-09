@@ -135,4 +135,25 @@ const addAnnouncements = async(req,res) =>{
         return res.status(500).json({message:err.message})
     }
 }
-module.exports = {getTeacherIdByToken,getCourseEnrolledStudents,createQuize,addAnnouncements,addAnnouncements,getNumberOFTotalStudents}
+const countNumberOfCoursesByTeacherId = async(req,res) =>{
+    const {teacherId} = req.params
+    try{
+    const courses = await course.find({teacher:teacherId})
+    if(courses.length==0)
+    {
+        return res.status(404).json({message:"Courses not found"})
+    }
+    let count = 0
+    for(const COURSE of courses)
+    {
+        count++
+    }
+    return res.status(200).json({count})
+    }catch(err)
+    {
+        return res.status(500).json({error:err.message})
+    }
+}
+module.exports = {getTeacherIdByToken,getCourseEnrolledStudents,createQuize,
+    addAnnouncements,addAnnouncements,
+    getNumberOFTotalStudents,countNumberOfCoursesByTeacherId}
