@@ -1,6 +1,7 @@
 const Course = require("../model/Course");
 const user = require("../model/User")
 const quiz = require("../model/QuizSchema")
+const announcement = require("../model/Announcement")
 const quizSubmissionSchema  = require("../model/QuizSubmissionSchema")
 const createCourses = async(req,res) =>{
     try{
@@ -55,7 +56,7 @@ const deleteCourse = async (req, res) => {
     if (!delCourse) {
       return res.status(404).json({ message: "Course not found" });
     }
-
+    await announcement.deleteMany({CourseId:id});
     // 2. Find all quizzes for this course
     const quizzes = await quiz.find({ courseId: id });
 
@@ -67,6 +68,7 @@ const deleteCourse = async (req, res) => {
 
       // 4. Delete all quiz submissions for those quizzes
       await quizSubmissionSchema.deleteMany({ quizId: { $in: quizIds } });
+
     }
 
     // 5. Remove courseId from all users' enrolledCourses

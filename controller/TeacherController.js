@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken")
 const user = require("../model/User")
 const course = require("../model/Course")
 const quiz = require("../model/QuizSchema")
+const quizSubmission = require("../model/QuizSubmissionSchema")
 const announcement = require("../model/Announcement")
 require("dotenv").config()
 const secretkey = process.env.JWT_SECRET
@@ -155,7 +156,56 @@ const countNumberOfQuizesByTeacherId = async(req,res) =>{
     return res.status(500).json({error:err.message})
 }
 }
+const getAllQuizesByTeacherId = async(req,res) =>{
+    const {teacherId} = req.params
+    try{
+        const quizes = await quiz.find({teacherId:teacherId}).populate('courseId', 'title').sort({createdAt:-1})
+        return res.status(200).json({quizes})
+    }catch(err)
+    {
+        return res.status(500).json({error:err.message})
+    }
+}
+const getQuizById = async(req,res) =>{
+    const {quizId} = req.params
+    try{
+    const matchedQuiz = await quiz.findById(quizId).populate('courseId', 'title')
+    if(matchedQuiz==null)
+    {
+        return res.status(404).json({message:"Quize not found"})
+    }
+    return res.status(200).json({matchedQuiz})
+}catch(err)
+{
+    return res.status(500).json({error:err.message})
+}
+}
+const getquizResultByQuizId = async(req,res) =>{
+    const {quizId} = req.params
+    try{
+    const quizeSubmissions = await quizSubmission.find({quizId:quizId}).populate('studentID','FullName email')
+    return res.status(200).json({quizeSubmissions})
+    }catch(err)
+    {
+        return res.status(500).json({error:err.message})
+    }
+
+}
+const deleteQuizes = async(req,res) =>{
+    const {quizId} = req.params
+    try{
+    await quiz.findByIdAndDelete(quizId)
+    await quizSubmission.deleteMany({quizId:quizId})
+    return res.status(200).json({message:"Delete successful"})
+    }catch(err)
+    {
+        return res.status(500).json({error:err.message})
+    }
+}
 module.exports = {getTeacherIdByToken,getCourseEnrolledStudents,createQuize,
     addAnnouncements,addAnnouncements,
     getNumberOFTotalStudents,
-    countNumberOfCoursesByTeacherId,countNumberOfQuizesByTeacherId}
+    countNumberOfCoursesByTeacherId,
+    countNumberOfQuizesByTeacherId,
+    getAllQuizesByTeacherId
+    ,getQuizById,getquizResultByQuizId,deleteQuizes}
