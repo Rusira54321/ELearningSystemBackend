@@ -202,10 +202,31 @@ const deleteQuizes = async(req,res) =>{
         return res.status(500).json({error:err.message})
     }
 }
+
+const deleteStudentByEmail = async(req,res) =>{
+    const {studentID} = req.body
+    try{
+    const deleteUser = await user.findByIdAndDelete(studentID)
+    if(!deleteUser)
+    {
+        return res.status(404).json({message:"User cant found"})
+    }
+    await quizSubmission.deleteMany({studentID:studentID})
+    await course.updateMany({},
+        {$pull:{enrollStudents:{StudentID:studentID}}}
+    )
+    return res.status(200).json({message:"Student deleted successfully"});
+}catch(err)
+{
+    return res.status(500).json({error:err.message})
+}
+
+}
 module.exports = {getTeacherIdByToken,getCourseEnrolledStudents,createQuize,
     addAnnouncements,addAnnouncements,
     getNumberOFTotalStudents,
     countNumberOfCoursesByTeacherId,
     countNumberOfQuizesByTeacherId,
     getAllQuizesByTeacherId
-    ,getQuizById,getquizResultByQuizId,deleteQuizes}
+    ,getQuizById,getquizResultByQuizId,deleteQuizes
+,deleteStudentByEmail}
