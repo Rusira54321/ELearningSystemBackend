@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken")
 const user = require("../model/User")
 const course = require("../model/Course")
+const enrollment = require("../model/Enrollement")
 const quiz = require("../model/QuizSchema")
 const quizSubmission = require("../model/QuizSubmissionSchema")
 const announcement = require("../model/Announcement")
@@ -215,12 +216,71 @@ const deleteStudentByEmail = async(req,res) =>{
     await course.updateMany({},
         {$pull:{enrollStudents:{StudentID:studentID}}}
     )
-    return res.status(200).json({message:"Student deleted successfully"});
+    return res.status(200).json({message:"Student deleted successfully"})
 }catch(err)
 {
     return res.status(500).json({error:err.message})
 }
 
+}
+
+const getLatestEnrollmentStatus = async(req,res) =>{
+    const {teacherId} = req.params
+    if (!teacherId) {
+      return res.status(400).json({ message: "Teacher ID is required" })
+    }
+    try{
+    const teacherCourses = await course.find({teacher:teacherId}).select("_id")
+    const courseIds = teacherCourses.map((course)=>course._id)
+    if(courseIds.length==0)
+    {
+        return res.status(404).json({ message: "No courses found for this teacher" });
+    }
+    const enrollments = await enrollment.find({ courseID: { $in: courseIds } })
+      .populate("courseID", "title teacher")
+      .populate("studentId", "FullName email")
+      .sort({ enrolledAt: -1 }).limit(5)
+    if (enrollments.length === 0) {
+      return res.status(404).json({ message: "No enrollments found for this teacher" });
+    }
+    return res.status(200).json({ enrollments });
+}catch(err)
+{
+    return res.status(500).json({ message: err.message });
+}
+}
+
+const getLatestQuizSubmissions = async(req,res) =>{
+    const {teacherId} = req.params
+    if(!teacherId)
+    {
+        return res.status(400).json({ message: "Teacher ID is required" })
+    }
+    try{
+    const quizes = await quiz.find({teacherId}).select("_id")
+    if(quizes.length==0)
+    {
+        return res.status(404).json({ message: "No quizes found for this teacher" })
+    }
+    const quizesIds = quizes.map((quizz)=>quizz._id)
+    const quizSubmissions = await quizSubmission.find({ quizId: { $in: quizesIds } })
+  .populate({
+    path: "quizId",
+    select: "title courseId",
+    populate: { path: "courseId", select: "title" } // populate the course of the quiz
+  })
+  .populate("studentID", "FullName email") // student info
+  .sort({ submittedAt: -1 }) // latest first
+  .limit(5)
+  if(quizSubmissions.length==0)
+  {
+    return res.status(404).json({ message: "No Quiz submissions found for this teacher" });
+  }
+  return res.status(200).json({quizSubmissions})
+}catch(err)
+{
+    return res.status(500).json({ message: err.message });
+}
 }
 module.exports = {getTeacherIdByToken,getCourseEnrolledStudents,createQuize,
     addAnnouncements,addAnnouncements,
@@ -229,4 +289,5 @@ module.exports = {getTeacherIdByToken,getCourseEnrolledStudents,createQuize,
     countNumberOfQuizesByTeacherId,
     getAllQuizesByTeacherId
     ,getQuizById,getquizResultByQuizId,deleteQuizes
-,deleteStudentByEmail}
+,deleteStudentByEmail,getLatestEnrollmentStatus
+,getLatestQuizSubmissions}

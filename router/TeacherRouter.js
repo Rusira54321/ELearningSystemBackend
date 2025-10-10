@@ -4,7 +4,8 @@ const {mutipleFileupload} = require("../Middleware/MulipleFileUploader")
 const {getTeacherIdByToken,getCourseEnrolledStudents,createQuize,addAnnouncements
     ,getNumberOFTotalStudents,countNumberOfCoursesByTeacherId
 ,countNumberOfQuizesByTeacherId,getAllQuizesByTeacherId
-,getQuizById,getquizResultByQuizId,deleteQuizes,deleteStudentByEmail} = require("../controller/TeacherController")
+,getQuizById,getquizResultByQuizId,deleteQuizes,deleteStudentByEmail,getLatestEnrollmentStatus
+,getLatestQuizSubmissions} = require("../controller/TeacherController")
 router.post("/getteacherid",getTeacherIdByToken)
 router.post("/getEnrolledStudents",createCourse,getCourseEnrolledStudents)
 router.post("/createQuiz",createCourse,createQuize)
@@ -17,5 +18,6 @@ router.get("/getQuizById/:quizId",createCourse,getQuizById)
 router.get("/getQuizResult/:quizId",createCourse,getquizResultByQuizId)
 router.delete("/deleteQuiz/:quizId",createCourse,deleteQuizes)
 router.post("/deleteStudents",createCourse,deleteStudentByEmail)
-router.dele
+router.get("/getLatestEnrollments/:teacherId",createCourse,getLatestEnrollmentStatus)
+router.get("/getLatestQuizSubmissions/:teacherId",createCourse,getLatestQuizSubmissions)
 module.exports = router

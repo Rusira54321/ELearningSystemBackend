@@ -6,6 +6,7 @@ const announcement = require("../model/Announcement")
 const Stripesecret = process.env.STRIPE_SECRET_KEY
 const stripe=require("stripe")(Stripesecret)
 const secretkey = process.env.JWT_SECRET
+const enrollment = require("../model/Enrollement")
 const quiz = require("../model/QuizSchema")
 const quizSubmission = require("../model/QuizSubmissionSchema")
 const verifyStudentTokens = (req,res) =>{
@@ -62,6 +63,11 @@ const enrollStudents = async(req,res) =>{
                 return res.status(400).json({ message: "User already enrolled in this course" })
             }
         }
+        const newEnrollment = new enrollment({
+            courseID:courseId,
+            studentId:userId
+        })
+        await newEnrollment.save()
         course.enrollStudents.push({
             StudentID:userId
         })
@@ -153,6 +159,14 @@ const stripeWebhook = async(req,res) =>{
                 console.log("Course is not found")
                 return
             }
+            const matchEnrollment = await enrollment.findOne({courseID:courseId,
+                studentId:userId
+            })
+            if(matchEnrollment)
+            {
+                console.log("this user is already enrolled to this course")
+                return
+            }
             course.enrollStudents.push({
                 StudentID:userId
             })
@@ -167,6 +181,11 @@ const stripeWebhook = async(req,res) =>{
                 courseID:courseId
             })
             await matchedUser.save()
+            const newEnrollment = new enrollment({
+                courseID:courseId,
+                studentId:userId
+            })
+            await newEnrollment.save()
             console.log("Webhook called successful");
             }catch(error)
             {
@@ -198,6 +217,11 @@ const submitQuiz = async(req,res) =>{
     if(!quizId || !studentId || !answers)
     {
         return res.status(400).json({message:"All fields are required"})
+    }
+    const existSubmission = await quizSubmission.findOne({quizId:quizId,studentID:studentId})
+    if(existSubmission)
+    {
+        return res.status(400).json({message: "You have already submitted this quiz"})
     }
     const MatchedQuiz= await quiz.findById(quizId)
     if(MatchedQuiz==null)
