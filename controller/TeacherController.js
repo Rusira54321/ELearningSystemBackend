@@ -212,6 +212,7 @@ const deleteStudentByEmail = async(req,res) =>{
     {
         return res.status(404).json({message:"User cant found"})
     }
+    await enrollment.deleteMany({studentId:studentID})
     await quizSubmission.deleteMany({studentID:studentID})
     await course.updateMany({},
         {$pull:{enrollStudents:{StudentID:studentID}}}

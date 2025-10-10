@@ -2,7 +2,8 @@ const Course = require("../model/Course");
 const user = require("../model/User")
 const quiz = require("../model/QuizSchema")
 const announcement = require("../model/Announcement")
-const quizSubmissionSchema  = require("../model/QuizSubmissionSchema")
+const quizSubmissionSchema  = require("../model/QuizSubmissionSchema");
+const Enrollement = require("../model/Enrollement");
 const createCourses = async(req,res) =>{
     try{
     const image = req.file.filename
@@ -56,6 +57,7 @@ const deleteCourse = async (req, res) => {
     if (!delCourse) {
       return res.status(404).json({ message: "Course not found" });
     }
+    await Enrollement.deleteMany({courseID:id})
     await announcement.deleteMany({CourseId:id});
     // 2. Find all quizzes for this course
     const quizzes = await quiz.find({ courseId: id });

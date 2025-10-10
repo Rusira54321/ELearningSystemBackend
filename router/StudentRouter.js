@@ -1,6 +1,8 @@
 const express = require("express")
 const router = express.Router()
-const {verifyStudentTokens,enrollStudents,StripeIntegrationForEnrolment,getQuizesbyCourse,submitQuiz,getQuizById,getStudentAnnouncements} = require("../controller/StudentController")
+const {verifyStudentTokens,enrollStudents,StripeIntegrationForEnrolment,getQuizesbyCourse,submitQuiz,getQuizById
+    ,getStudentAnnouncements,countTotalEnrolledCourses,totalCourses
+,totalCompletedQuizes,pendingQuizes,getRecentAnnouncements} = require("../controller/StudentController")
 const {authorizedStudent} = require("../Middleware/Student")
 const {getAllCourses} = require("../controller/CourseController")
 router.post("/verifyStudentToken",verifyStudentTokens)
@@ -11,4 +13,9 @@ router.get("/getQuizzes/:courseId",authorizedStudent,getQuizesbyCourse)
 router.post("/submitQuiz",authorizedStudent,submitQuiz)
 router.get("/getQuiz/:quizId",authorizedStudent,getQuizById)
 router.get("/getAnnouncements/:studentId",authorizedStudent,getStudentAnnouncements)
+router.get("/EnrolledCoursesCount/:studentId",authorizedStudent,countTotalEnrolledCourses)
+router.get("/totalCourses",authorizedStudent,totalCourses)
+router.get("/totalCompletedQuizes/:studentId",authorizedStudent,totalCompletedQuizes)
+router.get("/pendingQuizes/:studentId",authorizedStudent,pendingQuizes)
+router.get("/getRecentAnnouncements/:studentId",authorizedStudent,getRecentAnnouncements)
 module.exports = router

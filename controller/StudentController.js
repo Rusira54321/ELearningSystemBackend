@@ -298,7 +298,159 @@ const getStudentAnnouncements = async (req, res) => {
     return res.status(500).json({ message: "Server error", error: err.message })
   }
 }
+const countTotalEnrolledCourses = async(req,res) =>{
+    const {studentId} = req.params
+    try{
+    const Student = await user.findById(studentId)
+    if(Student==null)
+    {
+        return res.status(404).json({message:"User not found"})
+    }
+    const enrolledCourseCount = Student.enrolledCourses.length
+    return res.status(200).json({enrolledCourseCount})
+}catch(err)
+{
+    return res.status(500).json({error:err.message})
+}
+}
+const totalCourses = async(req,res) =>{
+    try{
+        const totalCourses = await Course.countDocuments()
+        return res.status(200).json({totalCourses})
+    }catch(err)
+    {
+        return res.status(500).json({error:err.message})
+    }
+}
+
+const totalCompletedQuizes = async(req,res) =>{
+    const {studentId} = req.params
+    if(!studentId)
+    {
+        return res.status(400).json({message:"StudentId is required"})
+    }
+    try{
+    const student = await user.findById(studentId)
+    if(student==null)
+    {
+        return res.status(404).json({message:"User is not found"})
+    }
+    const enrolledCoursesArray = student.enrolledCourses
+    let coursesIds = []
+    for(const courses of enrolledCoursesArray)
+    {
+        coursesIds.push(courses.courseID)
+    }
+    if(coursesIds.length==0)
+    {
+        return res.status(200).json({submissionCount:0})
+    }
+    const quizes = await quiz.find({courseId:{ $in: coursesIds }}).select("_id")
+    if(quizes.length==0)
+    {
+        return res.status(200).json({submissionCount:0})
+    }
+    let quizesIds = []
+    for(const quize of quizes)
+    {
+        quizesIds.push(quize._id)
+    }
+    const submissionCount = await quizSubmission.countDocuments({
+        quizId:{ $in: quizesIds },
+        studentID:studentId
+    })
+    return res.status(200).json({submissionCount})
+}catch(err)
+{
+    return res.status(500).json({error:err.message})
+}
+}
+
+const pendingQuizes = async(req,res) =>{
+    const {studentId} = req.params
+    if(!studentId)
+    {
+        return res.status(400).json({message:"StudentId is required"})
+    }
+    try{
+    const student = await user.findById(studentId)
+    if(student==null)
+    {
+        return res.status(404).json({message:"User is not found"})
+    }
+    const enrolledCoursesArray = student.enrolledCourses
+    let coursesIds = []
+    for(const courses of enrolledCoursesArray)
+    {
+        coursesIds.push(courses.courseID)
+    }
+    if(coursesIds.length==0)
+    {
+        return res.status(200).json({pendingQuizesCount:0})
+    }
+    const quizes = await quiz.find({courseId:{ $in: coursesIds }}).select("_id")
+    if(quizes.length==0)
+    {
+        return res.status(200).json({pendingQuizesCount:0})
+    }
+    let quizesIds = []
+    for(const quize of quizes)
+    {
+        quizesIds.push(quize._id)
+    }
+    const submissionCount = await quizSubmission.countDocuments({
+        quizId:{ $in: quizesIds },
+        studentID:studentId
+    })
+    const pendingQuizesCount = quizesIds.length - submissionCount
+    return res.status(200).json({pendingQuizesCount})
+}catch(err)
+{
+     return res.status(500).json({error:err.message})
+}
+}
+
+const getRecentAnnouncements = async(req,res) =>{
+     try {
+    const { studentId } = req.params
+
+    // 1. Find the student
+    const student = await user.findById(studentId)
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" })
+    }
+
+    // 2. Extract enrolled course IDs
+    const courseIds = student.enrolledCourses.map(c => c.courseID)
+
+    if (!courseIds || courseIds.length === 0) {
+      return res.status(200).json({ message: "No enrolled courses", announcements: [] })
+    }
+
+    // 3. Find all announcements for those courses
+    const announcements = await announcement.find({
+      CourseId: { $in: courseIds }
+    })
+      .populate("CourseId", "title")  // get course title
+      .populate("teacherId", "FullName email") // get teacher info
+      .sort({ createdAt: -1 }).limit(5) // latest first
+
+    // 4. Send response
+    return res.status(200).json({
+      announcements
+    })
+
+  } catch (err) {
+    console.error(err)
+    return res.status(500).json({ message: "Server error", error: err.message })
+  }
+}
 module.exports = {verifyStudentTokens,enrollStudents,StripeIntegrationForEnrolment,
     stripeWebhook,getQuizesbyCourse,submitQuiz,getQuizById
     ,getStudentAnnouncements
+    ,countTotalEnrolledCourses
+    ,totalCourses,
+    totalCompletedQuizes
+    ,pendingQuizes
+    ,getRecentAnnouncements 
 }
