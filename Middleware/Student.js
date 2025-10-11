@@ -25,9 +25,10 @@ const authorizedStudent = async(req,res,next) =>{
                   {
                         return res.status(403).json({message:"You are not Student"})
                   }
+                  next()
             }
             finduser()
-            next()
+            
         })
 }
 

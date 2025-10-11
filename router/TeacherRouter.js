@@ -4,7 +4,7 @@ const {mutipleFileupload} = require("../Middleware/MulipleFileUploader")
 const {getTeacherIdByToken,getCourseEnrolledStudents,createQuize,addAnnouncements
     ,getNumberOFTotalStudents,countNumberOfCoursesByTeacherId
 ,countNumberOfQuizesByTeacherId,getAllQuizesByTeacherId
-,getQuizById,getquizResultByQuizId,deleteQuizes,deleteStudentByEmail,getLatestEnrollmentStatus
+,getQuizById,getquizResultByQuizId,deleteQuizes,deleteStudentByID,getLatestEnrollmentStatus
 ,getLatestQuizSubmissions} = require("../controller/TeacherController")
 router.post("/getteacherid",getTeacherIdByToken)
 router.post("/getEnrolledStudents",createCourse,getCourseEnrolledStudents)
@@ -17,7 +17,7 @@ router.get("/getAllQuizesByTeacher/:teacherId",createCourse,getAllQuizesByTeache
 router.get("/getQuizById/:quizId",createCourse,getQuizById)
 router.get("/getQuizResult/:quizId",createCourse,getquizResultByQuizId)
 router.delete("/deleteQuiz/:quizId",createCourse,deleteQuizes)
-router.post("/deleteStudents",createCourse,deleteStudentByEmail)
+router.post("/deleteStudents",createCourse,deleteStudentByID)
 router.get("/getLatestEnrollments/:teacherId",createCourse,getLatestEnrollmentStatus)
 router.get("/getLatestQuizSubmissions/:teacherId",createCourse,getLatestQuizSubmissions)
 module.exports = router

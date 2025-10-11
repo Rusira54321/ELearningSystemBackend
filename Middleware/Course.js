@@ -21,13 +21,14 @@ const createCourse = async(req,res,next) =>{
             const id = payload.id
             const finduser = async() =>{
                   const matcheduser =   await user.findById(id)
-                  if(matcheduser.role=="Student" || matcheduser.role=="Admin")
+                  if(matcheduser.role=="Student")
                   {
-                        return res.status(403).json({message:"You are not teacher"})
+                        return res.status(403).json({message:"You are not teacher or Admin"})
                   }
+                  next()
             }
             finduser()
-            next()
+            
         })
 }
 

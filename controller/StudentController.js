@@ -7,6 +7,7 @@ const Stripesecret = process.env.STRIPE_SECRET_KEY
 const stripe=require("stripe")(Stripesecret)
 const secretkey = process.env.JWT_SECRET
 const enrollment = require("../model/Enrollement")
+const payment = require("../model/Payment")
 const quiz = require("../model/QuizSchema")
 const quizSubmission = require("../model/QuizSubmissionSchema")
 const verifyStudentTokens = (req,res) =>{
@@ -125,7 +126,8 @@ const StripeIntegrationForEnrolment = async(req,res) =>{
             metadata:{
                 items:JSON.stringify(items),
                 courseId:courseId,
-                userId:userId
+                userId:userId,
+                price:items[0].price.toString()
             }      
         })
         res.status(200).json({url: session.url})
@@ -152,6 +154,7 @@ const stripeWebhook = async(req,res) =>{
             const items = JSON.parse(session.metadata.items)
             const courseId = session.metadata.courseId
             const userId = session.metadata.userId
+            const PRICE = Number(session.metadata.price)
             try{
             const course = await Course.findById(courseId)
             if(course==null)
@@ -186,6 +189,12 @@ const stripeWebhook = async(req,res) =>{
                 studentId:userId
             })
             await newEnrollment.save()
+            const newpayment = new payment({
+                courseID:courseId,
+                studentId:userId,
+                amount:PRICE
+            })
+            await newpayment.save()
             console.log("Webhook called successful");
             }catch(error)
             {
