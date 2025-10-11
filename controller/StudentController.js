@@ -121,8 +121,8 @@ const StripeIntegrationForEnrolment = async(req,res) =>{
             payment_method_types:["card"],
             line_items:lineItems,
             mode:"payment",
-            success_url:`http://localhost:3000/student/courseInclude/${courseId}`,
-            cancel_url:`http://localhost:3000/student/courseDetails/${courseId}`,
+            success_url:`https://e-learning-system-frontend-ten.vercel.app/student/courseInclude/${courseId}`,
+            cancel_url:`https://e-learning-system-frontend-ten.vercel.app/student/courseDetails/${courseId}`,
             metadata:{
                 items:JSON.stringify(items),
                 courseId:courseId,
